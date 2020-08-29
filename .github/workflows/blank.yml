@@ -1,0 +1,19 @@
+name: Webhook Update src
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Install kustomize
+        run: curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash && sudo install -m 755 kustomize /usr/local/bin/kustomize
+
+      - name: Trigger second repository
+        run: |
+          curl -XPOST -u "fdns:${{secrets.PAT_SECRET}}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/fdns/action-hook-target/dispatches --data '{"event_type": "client_payload": {"type": "staging"}}'
